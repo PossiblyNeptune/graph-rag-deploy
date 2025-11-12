@@ -1,21 +1,12 @@
-"""
-Graph RAG Query Engine for Premier League Football
-Flexible guidance covering tactics, players, managers, team performance, club business, and football history.
-Based on "The Mixer" (Michael Cox - Tactics) and "The Club" (Robinson & Clegg - Business).
-"""
-
 import os
 import heapq
 import time
 from dotenv import load_dotenv
 from typing import List, Tuple, Dict
 
-# --- MODIFIED: Import ChatCohere ---
-from langchain_cohere import ChatCohere 
+from langchain_cohere import ChatCohere
 from langchain_core.prompts import PromptTemplate
 
-from create_embeddings import DocumentProcessor
-from create_database import KnowledgeGraph
 from metadata_logger import MetadataLogger
 
 load_dotenv()
@@ -23,7 +14,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 class QueryEngine:
-    def __init__(self, vector_store, knowledge_graph, llm: ChatCohere): # <-- MODIFIED type hint
+    def __init__(self, vector_store, knowledge_graph, llm: ChatCohere):
         """
         Initializes the QueryEngine with vector store, knowledge graph, and LLM.
 
@@ -48,14 +39,9 @@ class QueryEngine:
         
         print("⚽ QueryEngine initialized for Premier League football knowledge")
 
-    #
-    # ... (All your other methods like _classify_query, _expand_context, etc. remain unchanged) ...
-    #
-    
     def _classify_query(self, query: str) -> str:
         """
         Classify the query type for optimized processing.
-        ... (NO CHANGES NEEDED) ...
         """
         query_lower = query.lower()
         
@@ -106,7 +92,6 @@ class QueryEngine:
     def _expand_context(self, query: str, query_type: str, relevant_docs) -> Tuple[str, List[int], Dict[int, str]]:
         """
         Expands the context by traversing the knowledge graph.
-        ... (NO CHANGES NEEDED) ...
         """
         expanded_context = ""
         traversal_path = []
@@ -130,7 +115,7 @@ class QueryEngine:
                     distances[node_id] = priority
                 
             except Exception as e:
-                print(f"   ⚠️  Error initializing traversal: {e}")
+                print(f"    ⚠️  Error initializing traversal: {e}")
                 continue
 
         step = 0
@@ -149,15 +134,15 @@ class QueryEngine:
                 new_context = expanded_context + "\n" + node_content if expanded_context else node_content
                 
                 if len(new_context) > self.max_context_length:
-                    print(f"   ⚠️  Context limit reached ({len(new_context)} chars)")
+                    print(f"    ⚠️  Context limit reached ({len(new_context)} chars)")
                     break
                 
                 filtered_content[current_node] = node_content
                 expanded_context = new_context
 
-                print(f"\n   Step {step} - Node {current_node}:")
-                print(f"   Concepts: {', '.join(node_concepts[:5]) if node_concepts else 'None'}")
-                print(f"   Content length: {len(node_content)} chars")
+                print(f"\n    Step {step} - Node {current_node}:")
+                print(f"    Concepts: {', '.join(node_concepts[:5]) if node_concepts else 'None'}")
+                print(f"    Content length: {len(node_content)} chars")
 
                 node_concepts_set = set(node_concepts)
                 if not node_concepts_set.issubset(visited_concepts):
@@ -229,7 +214,6 @@ Provide a clear, direct answer based on the context. Be specific and reference r
         )
         
         try:
-            # --- MODIFIED: Print statement ---
             print(f"\n🔧 Generating answer with Cohere...") 
             
             response_chain = response_prompt | self.llm
@@ -239,7 +223,6 @@ Provide a clear, direct answer based on the context. Be specific and reference r
                 "guidance": guidance
             })
             
-            # This logic works for ChatCohere
             if hasattr(response, 'content'):
                 answer_text = response.content
             elif isinstance(response, str):
@@ -247,7 +230,6 @@ Provide a clear, direct answer based on the context. Be specific and reference r
             else:
                 answer_text = str(response)
             
-            # ... (confidence logic remains the same) ...
             answer_length = len(answer_text)
             has_structure = any(phrase in answer_text.lower() for phrase in 
                                 ['because', 'however', 'therefore', 'example', 'specifically', 'particularly'])
@@ -274,12 +256,11 @@ Provide a clear, direct answer based on the context. Be specific and reference r
     def _retrieve_relevant_documents(self, query: str):
         """
         Retrieves relevant documents with query-type tuning.
-        ... (NO CHANGES NEEDED) ...
         """
         print("\n🔍 Retrieving relevant documents...")
         
         enriched_query = self._enrich_query(query)
-        print(f"   Enriched query: {enriched_query}")
+        print(f"    Enriched query: {enriched_query}")
         
         query_type = self._classify_query(query)
         
@@ -294,14 +275,13 @@ Provide a clear, direct answer based on the context. Be specific and reference r
         )
         
         results = base_retriever.invoke(enriched_query)
-        print(f"   ✓ Retrieved {len(results)} relevant documents (k={k})")
+        print(f"    ✓ Retrieved {len(results)} relevant documents (k={k})")
         
         return results
 
     def _enrich_query(self, query: str) -> str:
         """
         Enrich query with related football terms.
-        ... (NO CHANGES NEEDED) ...
         """
         enriched = query
         
@@ -325,7 +305,6 @@ Provide a clear, direct answer based on the context. Be specific and reference r
     def query(self, query: str) -> Tuple[str, List[int], Dict[int, str]]:
         """
         Processes a query by retrieving documents, expanding context, and generating answer.
-        ... (NO CHANGES NEEDED) ...
         """
         start_time = time.time()
         
@@ -362,4 +341,5 @@ Provide a clear, direct answer based on the context. Be specific and reference r
         print(f"\n✅ Response generated in {response_time:.2f}s")
         print(f"📊 Session ID: {session_id}")
         
+
         return final_answer, traversal_path, filtered_content
