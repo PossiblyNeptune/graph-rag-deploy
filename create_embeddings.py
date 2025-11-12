@@ -1,28 +1,13 @@
-"""
-Document Processor (BUILD SCRIPT)
-Processes documents, creates embeddings using Cohere, 
-and populates a cloud-hosted PGVector database.
-
---- VERCEL-SAFE REVISION V6 ---
-- FINAL FIX 3: Corrects 'load_vector_store' to use 
-  PGVector.from_existing_index instead of the base constructor.
-  This fixes the "unexpected keyword argument 'embedding'" error.
-- All other fixes (NUL-byte, rate-limiting, 'connection' keyword) 
-  are retained.
-"""
 
 import numpy as np
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-# from langchain_community.document_loaders import PyPDFLoader # --- MOVED (Heavy)
 from langchain_postgres.vectorstores import PGVector
 from langchain_cohere import CohereEmbeddings
-# from sklearn.metrics.pairwise import cosine_similarity  # --- MOVED (Heavy)
 from typing import List
 import os
 from dotenv import load_dotenv
 import time 
 
-# from football_tactics_preprocessor import FootballTacticsPreprocessor # --- MOVED (Heavy)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -79,18 +64,16 @@ class DocumentProcessor:
         
         print("Applying football preprocessing...")
         self._lazy_load_preprocessor()
-        from football_tactics_preprocessor import FootballTacticsPreprocessor # For static method
+        from football_tactics_preprocessor import FootballTacticsPreprocessor 
 
         for i, split in enumerate(splits):
             processed_content, tactical_entities = self.preprocessor.preprocess_chunk(
                 split.page_content
             )
             
-            # --- NUL BYTE FIX ---
             clean_content = processed_content.replace('\x00', '')
-            # --- END FIX ---
 
-            split.page_content = clean_content # Use the cleaned content
+            split.page_content = clean_content
             split.metadata['chunk_id'] = i
             split.metadata['source_file'] = split.metadata.get('source', 'unknown')
             split.metadata['page_number'] = split.metadata.get('page', 'unknown')
@@ -123,7 +106,6 @@ class DocumentProcessor:
             print("    Build script cannot continue without the first batch. Aborting.")
             raise e
 
-        # Loop through the REST of the batches
         for i in range(batch_size, len(splits), batch_size):
             batch = splits[i : i + batch_size]
             current_batch_num = (i // batch_size) + 1
@@ -160,7 +142,6 @@ class DocumentProcessor:
         print(f"✓ Similarity matrix computed with shape {similarity_matrix.shape}.")
         return similarity_matrix
 
-    # --- THIS FUNCTION IS NOW FIXED ---
     def load_vector_store(self):
         """
         Connects to an EXISTING cloud-based PGVector store.
@@ -169,7 +150,6 @@ class DocumentProcessor:
         print(f"Connecting to existing cloud vector store (collection: {self.collection_name})...")
         
         try:
-            # FIX: Use .from_existing_index to load the store, not the constructor
             vector_store = PGVector.from_existing_index(
                 embedding=self.embeddings,
                 collection_name=self.collection_name,
@@ -200,9 +180,7 @@ class DocumentProcessor:
                 split.page_content
             )
             
-            # --- NUL BYTE FIX ---
             clean_content = processed_content.replace('\x00', '')
-            # --- END FIX ---
                 
             split.page_content = clean_content
             split.metadata['tactical_keywords'] = FootballTacticsPreprocessor.create_tactical_keywords(
@@ -219,7 +197,6 @@ class DocumentProcessor:
         return 1024
 
 
-# This block is now your "Build and Test" script.
 if __name__ == "__main__":
     from langchain_community.document_loaders import PyPDFLoader
     
@@ -267,4 +244,5 @@ if __name__ == "__main__":
         print("Your cloud vector database is now populated.")
         print("="*60)
     else:
+
         print("\nNo documents a found to process.")
