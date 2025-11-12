@@ -1,8 +1,3 @@
-"""
-Football Tactics Domain Preprocessor - Optimized for The Mixer PDF
-Normalizes football terminology and extracts key figures, teams, and tactics.
-"""
-
 import re
 from typing import Dict, List, Tuple
 
@@ -10,7 +5,6 @@ from typing import Dict, List, Tuple
 class FootballTacticsPreprocessor:
     """Preprocesses text to normalize football terminology and extract domain entities."""
     
-    # Key figures mentioned in The Mixer
     KEY_FIGURES = [
         'arsene wenger', 'alex ferguson', 'eric cantona', 'dennis bergkamp',
         'thierry henry', 'alan ball', 'matt le tissier', 'gary neville',
@@ -149,30 +143,26 @@ class FootballTacticsPreprocessor:
             'defensive_concepts': [],
             'offensive_concepts': [],
             'tactical_roles': [],
-            'key_figures': [],  # NEW
-            'key_teams': []  # NEW
+            'key_figures': [],  
+            'key_teams': []  
         }
         
         text_lower = text.lower()
         
-        # Extract formations
         for formation in ['4-4-2', '4-3-3', '4-2-3-1', '3-5-2', '5-2-3', '5-3-2', 'W-M', '2-3-5']:
             if formation.lower() in text_lower:
                 entities['formations'].append(formation)
         
-        # Extract defensive concepts (with word boundaries)
         for concept in FootballTacticsPreprocessor.DEFENSIVE_CONCEPTS.keys():
             pattern = r'\b' + re.escape(concept.lower()) + r'\b'
             if re.search(pattern, text_lower):
                 entities['defensive_concepts'].append(concept)
         
-        # Extract offensive concepts (with word boundaries)
         for concept in FootballTacticsPreprocessor.OFFENSIVE_CONCEPTS.keys():
             pattern = r'\b' + re.escape(concept.lower()) + r'\b'
             if re.search(pattern, text_lower):
                 entities['offensive_concepts'].append(concept)
         
-        # Extract tactical roles (with word boundaries)
         roles = ['regista', 'trequartista', 'libero', 'enganche', 'mezzala', 'volante',
                  'defensive midfielder', 'attacking midfielder', 'false number 9']
         for role in roles:
@@ -180,13 +170,11 @@ class FootballTacticsPreprocessor:
             if re.search(pattern, text_lower):
                 entities['tactical_roles'].append(role)
         
-        # NEW: Extract key figures from The Mixer
         for figure in FootballTacticsPreprocessor.KEY_FIGURES:
             pattern = r'\b' + re.escape(figure.lower()) + r'\b'
             if re.search(pattern, text_lower):
                 entities['key_figures'].append(figure.title())
         
-        # NEW: Extract key teams from The Mixer
         for team in FootballTacticsPreprocessor.KEY_TEAMS:
             pattern = r'\b' + re.escape(team.lower()) + r'\b'
             if re.search(pattern, text_lower):
