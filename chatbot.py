@@ -3,7 +3,7 @@ import streamlit as st
 from dotenv import load_dotenv
 import pickle
 import traceback
-import json  # Added from Code 1 for sidebar connectivity report
+import json 
 
 from langchain_cohere import ChatCohere
 from create_embeddings import DocumentProcessor
@@ -357,5 +357,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
