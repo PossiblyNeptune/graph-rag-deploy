@@ -1,27 +1,11 @@
-"""
-Knowledge Graph Construction with Football Tactics Domain Optimization
-
---- VERCEL-SAFE REVISION ---
-This file is now Vercel-safe. All heavy build-time libraries (spaCy, NLTK, etc.)
-are "lazy-loaded" inside the 'build_mode=True' functions.
-The main class can be safely imported by a Vercel app (like chatbot.py)
-in 'build_mode=False' without loading any heavy dependencies.
-"""
-
 import networkx as nx
 import pickle
 import os
 import time
-# import matplotlib.pyplot as plt  # --- REMOVED (Heavy & Unused)
-# import nltk                      # --- MOVED (Heavy)
-# import spacy                     # --- MOVED (Heavy)
-# from sklearn.metrics.pairwise import cosine_similarity # --- MOVED (Heavy)
 from concurrent.futures import ThreadPoolExecutor, as_completed
-# from tqdm import tqdm            # --- MOVED (Heavy)
 from typing import List, Dict, Tuple
 from dotenv import load_dotenv
 import json
-# from football_tactics_preprocessor import FootballTacticsPreprocessor # --- MOVED (Heavy)
 
 load_dotenv()
 
@@ -66,19 +50,15 @@ class KnowledgeGraph:
         from football_tactics_preprocessor import FootballTacticsPreprocessor
         # --- END LAZY IMPORTS ---
 
-        # Download and import NLTK data
         nltk.download('punkt', quiet=True)
         nltk.download('wordnet', quiet=True)
         nltk.download('punkt_tab', quiet=True)
         self.lemmatizer = WordNetLemmatizer()
 
-        # Load spaCy
         self.nlp = self._load_spacy_model()
         
-        # Initialize preprocessor
         self.preprocessor = FootballTacticsPreprocessor()
         
-        # Create progress directory
         if self.save_progress:
             os.makedirs(self.progress_dir, exist_ok=True)
             print(f"📊 Progress visualizations will be saved to: {self.progress_dir}/")
@@ -112,14 +92,11 @@ class KnowledgeGraph:
         if content in self.concept_cache:
             return self.concept_cache[content]
 
-        # Extract named entities using spaCy
         doc = self.nlp(content)
         named_entities = [ent.text for ent in doc.ents if ent.label_ in ["PERSON", "ORG", "GPE"]]
 
-        # Extract football tactics entities
         tactical_entities = self.preprocessor.extract_tactical_entities(content)
         
-        # Combine named entities with tactical entities
         tactical_concepts = (
             tactical_entities.get('formations', []) +
             tactical_entities.get('tactical_roles', []) +
@@ -366,4 +343,5 @@ class KnowledgeGraph:
             return 0
         
         successful = sum(1 for m in self.extraction_metadata if m['extraction_success'])
+
         return successful / len(self.extraction_metadata)
