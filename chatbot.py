@@ -188,8 +188,8 @@ def main():
         - "Describe the 4-3-3 formation"
         - "Who were key players in Liverpool's success?"
         - "How did pressing tactics change English football?"
-        - "Compare different managerial approaches"
-        - "What changed when Wenger focused on diet?"
+        - "Compare the tactics of Pep Guardiola and Sir Alex Ferguson"
+        - "What was the influence of Roman Abramovich on the Premier League"
         """)
         
         st.divider()
@@ -386,3 +386,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
