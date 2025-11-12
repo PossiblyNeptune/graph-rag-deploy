@@ -1,24 +1,18 @@
-"""
-Metadata Logger for Graph RAG System (VERCEL-SAFE)
-This version logs to stdout (print) and does not write to the filesystem.
-"""
-
 import json
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 import hashlib
 
 class MetadataLogger:
-    """Vercel-safe logger. Logs to stdout (print)."""
     
     def __init__(self, graph=None):
         self.graph = graph
-        print("📊 Vercel-Safe Metadata logging initialized.")
+        print("📊Metadata logging initialized.")
     
     def log_query_session(self, 
                           query: str,
                           query_type: str,
-                          retrieved_docs: List[Any], # Use Any to avoid LangChain doc import
+                          retrieved_docs: List[Any], 
                           traversal_path: List[int],
                           traversal_decisions: List[Dict],
                           filtered_content: Dict[int, str],
@@ -58,13 +52,10 @@ class MetadataLogger:
             },
         }
         
-        # Vercel-safe: Log the full JSON entry to stdout
         try:
-            # We print the JSON string. Vercel will capture this.
             print(json.dumps(log_entry))
             print(f"📊 Session logged: {session_id}")
         except Exception as e:
-            # This might happen if the log_entry has non-serializable data
             print(f"⚠️  Could not serialize or print log: {e}")
             print(f"Fallback log: {{'session_id': '{session_id}', 'query': '{query}'}}")
 
@@ -93,4 +84,5 @@ class MetadataLogger:
     # --- ALL FILE-READING METHODS ARE REMOVED ---
     # Methods like get_session_logs, generate_retrieval_report,
     # and get_statistics_summary are removed as they
+
     # depend on reading files that no longer exist.
