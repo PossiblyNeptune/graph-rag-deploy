@@ -1,15 +1,3 @@
-"""
-MASTER BUILD SCRIPT (Cohere + PGVector)
-
-Run this file ONCE from your local machine to:
-1. Load all PDFs from the 'data' folder.
-2. Process and embed them using the Cohere API.
-3. Upload all documents and vectors to your cloud PGVector database.
-4. Build the knowledge_graph.pkl file.
-
-This single script prepares your Streamlit Cloud deployment.
-"""
-
 import os
 import glob
 import sys
@@ -56,20 +44,20 @@ def run_build_process():
     all_documents = []
     for pdf_path in pdf_files:
         filename = os.path.basename(pdf_path)
-        print(f"   Loading: {filename}...")
+        print(f"    Loading: {filename}...")
         try:
             loader = PyPDFLoader(pdf_path)
             documents = loader.load()
             all_documents.extend(documents)
-            print(f"   ✓ Loaded {len(documents)} pages")
+            print(f"    ✓ Loaded {len(documents)} pages")
         except Exception as e:
-            print(f"   ✗ Error loading {filename}: {e}")
+            print(f"    ✗ Error loading {filename}: {e}")
             
     if not all_documents:
         print("\n❌ No documents could be loaded!")
         sys.exit(1)
         
-    print(f"\n   Total pages loaded: {len(all_documents)}")
+    print(f"\n    Total pages loaded: {len(all_documents)}")
 
     # 3. Initialize DocumentProcessor (with Cohere Embeddings)
     print("\n1. Initializing Document Processor (Cohere)...")
@@ -120,8 +108,8 @@ def run_build_process():
     print("2. Push to GitHub")
     print("3. Deploy to Streamlit Cloud")
     print("4. Add environment variables in Streamlit Cloud settings:")
-    print("   - COHERE_API_KEY")
-    print("   - PGVECTOR_CONNECTION_STRING")
+    print("    - COHERE_API_KEY")
+    print("    - PGVECTOR_CONNECTION_STRING")
     print("="*60)
 
 if __name__ == "__main__":
