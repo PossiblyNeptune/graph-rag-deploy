@@ -1,12 +1,3 @@
-"""
-Streamlit Chatbot UI for Premier League Football Knowledge
-Enhanced debugging, metadata display, and general football theming.
-Based on **The Mixer** (Michael Cox - Tactics) and **The Club** (Robinson & Clegg - Business).
-Uses COHERE (Cloud) for all LLM and Embedding tasks.
-
-**MERGED CODE:** Functionality from Code 2, UI (Sidebar + CSS) from Code 1.
-"""
-
 import os
 import streamlit as st
 from dotenv import load_dotenv
@@ -97,7 +88,7 @@ def main():
         layout="wide"
     )
     
-    # Custom CSS - FROM CODE 1
+    # Custom CSS
     st.markdown("""
         <style>
         .chunk-box {
@@ -158,14 +149,14 @@ def main():
         </style>
     """, unsafe_allow_html=True)
     
-    # Header (Identical in both)
+    # Header
     st.title("⚽ Premier League Knowledge Bot")
     st.markdown("""
     Explore Premier League history, business, tactics, players, managers, and teams. 
     Powered by **The Mixer** (Michael Cox - Tactics) and **The Club** (Robinson & Clegg - Business)
     """)
     
-    # Sidebar - FROM CODE 1 (with functional modifications)
+    # Sidebar
     with st.sidebar:
         st.header("📖 About This Bot")
         st.markdown("""
@@ -194,12 +185,10 @@ def main():
         
         st.divider()
         
-        # Database info - Layout from Code 1, Logic from Code 2
         kg_path = "knowledge_graph.pkl"
         if os.path.exists(kg_path):
             st.success("✅ Knowledge Base Found")
             try:
-                # Use Code 2's method for loading stats
                 kg_info = KnowledgeGraph(build_mode=False)
                 kg_info.load_graph(kg_path)
                 num_nodes = len(kg_info.graph.nodes)
@@ -207,7 +196,6 @@ def main():
                 
                 st.metric("Knowledge Concepts (Nodes)", num_nodes)
                 st.metric("Connections (Edges)", num_edges)
-                # Add density metric from Code 1
                 st.metric("Graph Density", f"{num_edges / max(num_nodes * (num_nodes - 1) / 2, 1):.3f}")
             except Exception as e:
                 st.warning(f"Could not read graph stats: {e}")
@@ -215,19 +203,16 @@ def main():
             st.error("❌ Knowledge Base Not Found")
             st.info("Please ensure 'knowledge_graph.pkl' is in your repository root.")
         
-        # Use Code 2's button text ("Reload Models")
         if st.button("🔄 Reload Models"):
             st.cache_resource.clear()
             st.rerun()
         
-        # Debug toggle (Identical in both)
         debug_mode = st.checkbox("🔍 Show Retrieval Details", value=False)
         
         st.divider()
 
         st.subheader("📊 Graph Connectivity")
 
-        # Display connectivity metrics (From Code 1)
         if os.path.exists("graph_visualizations/connectivity_report.json"):
             with open("graph_visualizations/connectivity_report.json", 'r') as f:
                 connectivity = json.load(f)
@@ -245,16 +230,13 @@ def main():
             if st.button("📂 Open Graph Dashboard"):
                 st.info("Open `graph_visualizations/dashboard.html` in your browser")
         
-        # Use Code 2's caption text
         st.caption("Made with ⚽ and knowledge graphs | Powered by Cohere")
     
-    # Check for graph file - FROM CODE 2
     if not os.path.exists("knowledge_graph.pkl"):
         st.error("⚠️ Knowledge graph file not found!")
         st.info("Please run your build script locally and commit 'knowledge_graph.pkl' to your repository.")
         return
     
-    # Load chatbot - FROM CODE 2
     try:
         with st.spinner("Connecting to knowledge base..."):
             query_engine, vector_store, knowledge_graph = load_chatbot()
@@ -265,16 +247,13 @@ def main():
             st.code(traceback.format_exc())
         return
     
-    # Initialize chat history - FROM CODE 2
     if "messages" not in st.session_state:
         st.session_state.messages = []
     
-    # Display chat history - FROM CODE 2
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             
-            # Show debug info if available (Code 2's logic)
             if debug_mode and "debug_info" in message:
                 with st.expander("🔍 Retrieval Details"):
                     debug_info = message["debug_info"]
@@ -302,7 +281,6 @@ def main():
                         st.write("**Retrieved Content:**")
                         for i, chunk in enumerate(debug_info['chunks'][:5]):
                             with st.container():
-                                # This block will now use the new CSS from Code 1
                                 st.markdown(f"""
                                 <div class="chunk-box">
                                     <span class="pdf-label">{chunk['source']}</span>
@@ -311,14 +289,11 @@ def main():
                                 </div>
                                 """, unsafe_allow_html=True)
     
-    # Chat input - FROM CODE 2
     if prompt := st.chat_input("Ask about Premier League football..."):
-        # Add user message
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
         
-        # Generate response - FROM CODE 2
         with st.chat_message("assistant"):
             with st.spinner("Searching knowledge base..."):
                 try:
@@ -331,14 +306,12 @@ def main():
                     
                     st.markdown(response_text)
                     
-                    # Prepare debug info (Code 2's logic)
                     debug_info = {
                         'traversal_path': traversal_path,
                         'query_type': query_engine._classify_query(prompt),
                         'chunks': []
                     }
                     
-                    # Extract chunk information from graph (Code 2's logic)
                     for node_id in traversal_path:
                         if node_id in filtered_content:
                             try:
@@ -357,7 +330,6 @@ def main():
                             except Exception as e:
                                 print(f"Error retrieving metadata for node {node_id}: {e}")
                     
-                    # Add assistant message (Code 2's logic)
                     st.session_state.messages.append({
                         "role": "assistant",
                         "content": response_text,
@@ -376,7 +348,6 @@ def main():
                         "error": traceback.format_exc()
                     })
     
-    # Footer controls - FROM CODE 2
     col1, col2, col3 = st.columns([1, 3, 1])
     with col1:
         if st.button("🔴 Clear Chat"):
@@ -386,4 +357,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
